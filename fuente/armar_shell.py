@@ -329,5 +329,31 @@ r("""  iniciar();
 import re
 resto = re.sub(r"<\?!= incluir_\('\w+'\); \?>", '', s)
 assert '<?' not in resto, 'quedo un resto de plantilla de Apps Script'
+# ---------- graficos: el clic que filtra se ejecuta despues de que Chart.js termina con el evento ----------
+# Sin esto, cada clic en una barra tiraba "Cannot read properties of undefined (reading 'handleEvent')":
+# el filtro redibuja (destruye) el grafico mientras Chart.js todavia esta procesando ese mismo clic.
+r("""  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+""", """  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>
+    // Los graficos filtran con un clic y ese filtro redibuja (destruye) el mismo grafico. Si se hace dentro del evento,
+    // Chart.js sigue procesando el evento sobre un grafico ya destruido y tira "reading 'handleEvent'".
+    // Arreglo general: el onClick de TODOS los graficos se ejecuta recien cuando Chart.js termino con el evento.
+    (function () {
+      var Original = window.Chart; if (!Original) return;
+      function diferir(cfg) {
+        var o = cfg && cfg.options;
+        if (o && typeof o.onClick === 'function' && !o.onClick.__diferido) {
+          var f = o.onClick;
+          o.onClick = function (e, act, ch) { var yo = this, a = (act || []).slice(); setTimeout(function () { f.call(yo, e, a, ch); }, 0); };
+          o.onClick.__diferido = true;
+        }
+        return cfg;
+      }
+      class ChartPanel extends Original { constructor(item, cfg) { super(item, diferir(cfg)); } }
+      window.Chart = ChartPanel;
+    })();
+  </script>
+""")
+
 open('fuente/Index.html', 'w', encoding='utf-8').write(s)
 print('armazon OK', len(s))

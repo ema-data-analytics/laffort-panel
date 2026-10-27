@@ -9,6 +9,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>
+    // Los graficos filtran con un clic y ese filtro redibuja (destruye) el mismo grafico. Si se hace dentro del evento,
+    // Chart.js sigue procesando el evento sobre un grafico ya destruido y tira "reading 'handleEvent'".
+    // Arreglo general: el onClick de TODOS los graficos se ejecuta recien cuando Chart.js termino con el evento.
+    (function () {
+      var Original = window.Chart; if (!Original) return;
+      function diferir(cfg) {
+        var o = cfg && cfg.options;
+        if (o && typeof o.onClick === 'function' && !o.onClick.__diferido) {
+          var f = o.onClick;
+          o.onClick = function (e, act, ch) { var yo = this, a = (act || []).slice(); setTimeout(function () { f.call(yo, e, a, ch); }, 0); };
+          o.onClick.__diferido = true;
+        }
+        return cfg;
+      }
+      class ChartPanel extends Original { constructor(item, cfg) { super(item, diferir(cfg)); } }
+      window.Chart = ChartPanel;
+    })();
+  </script>
   <style>
     :root {
       --navy:#09233A; --navy-content:#0B2740; --navy-card:#123252; --border:rgba(255,255,255,0.08);
