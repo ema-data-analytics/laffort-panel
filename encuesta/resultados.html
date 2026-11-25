@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resultados de la encuesta · EMA Data Analytics</title>
+<meta name="robots" content="noindex">
+<style>
+  :root { --fondo:#061829; --caja:#0e2b44; --borde:rgba(255,255,255,.13); --texto:#fff; --suave:#B9CBDC; --tenue:#8EA5B8; --verde:#00C08B; --rojo:#FF6B6B; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--fondo); color:var(--texto); font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; -webkit-font-smoothing:antialiased; }
+  .mono { font-family:ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas, monospace; }
+  .contenedor { max-width:1400px; margin:0 auto; padding:16px 18px 40px; }
+  header { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding-bottom:14px; border-bottom:1px solid var(--borde); margin-bottom:18px; }
+  .logos { display:flex; align-items:center; gap:12px; }
+  .logos img { height:38px; } .logos img.mm { border-radius:7px; }
+  h1 { font-size:21px; margin:0; font-weight:800; letter-spacing:-.02em; }
+  h2 { font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--verde); margin:28px 0 10px; }
+  .btn { border:none; border-radius:10px; padding:10px 14px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; }
+  .btn-principal { background:var(--verde); color:#042b20; }
+  .btn-sec { background:transparent; color:var(--texto); border:1px solid var(--borde); }
+  .btn:disabled { opacity:.5; cursor:default; }
+  .login { max-width:360px; margin:60px auto; background:var(--caja); border:1px solid var(--borde); border-radius:14px; padding:22px; }
+  .login label { display:block; font-size:13px; color:var(--suave); margin:12px 0 6px; }
+  input, select, textarea { width:100%; background:#0a2033; color:var(--texto); border:1px solid var(--borde); border-radius:8px; padding:10px 12px; font-size:15px; font-family:inherit; }
+  .error { color:var(--rojo); font-size:14px; min-height:18px; margin-top:10px; }
+  .tarjetas { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:10px; }
+  .tarjeta { background:var(--caja); border:1px solid var(--borde); border-radius:12px; padding:12px 14px; }
+  .tarjeta .n { font-size:26px; font-weight:800; }
+  .tarjeta .t { font-size:12px; color:var(--suave); margin-top:2px; }
+  .tarjeta .p { font-size:12px; color:var(--verde); }
+  .grilla { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:12px; }
+  .preg { background:var(--caja); border:1px solid var(--borde); border-radius:12px; padding:14px; }
+  .preg h3 { font-size:14px; margin:0 0 4px; line-height:1.35; }
+  .preg .sub { font-size:12px; color:var(--tenue); margin-bottom:10px; }
+  .fila { display:grid; grid-template-columns:1fr 46px; gap:8px; align-items:center; font-size:13px; margin:6px 0; }
+  .fila .barra { height:6px; background:#0a2033; border-radius:4px; overflow:hidden; margin-top:4px; }
+  .fila .barra div { height:100%; background:var(--verde); }
+  .fila .num { text-align:right; }
+  .texto-libre { font-size:13px; border-top:1px solid var(--borde); padding:8px 0; }
+  .texto-libre small { color:var(--tenue); display:block; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:left; padding:8px; border-bottom:1px solid var(--borde); vertical-align:top; }
+  th { color:var(--tenue); font-weight:600; font-size:12px; white-space:nowrap; }
+  .tabla { overflow-x:auto; background:var(--caja); border:1px solid var(--borde); border-radius:12px; }
+  td select { min-width:112px; padding:6px 8px; font-size:13px; }
+  td textarea { min-width:140px; min-height:38px; padding:6px 8px; font-size:13px; }
+  td .resp { min-width:190px; color:var(--suave); font-size:12.5px; line-height:1.45; }
+  td .resp b { color:var(--texto); font-weight:600; }
+  .barra-acciones { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .barra-acciones select { width:auto; padding:8px 10px; font-size:14px; }
+  .chico { font-size:12px; color:var(--tenue); }
+  .oculto { display:none !important; }
+  .mini { display:flex; gap:18px; flex-wrap:wrap; font-size:13px; }
+  .mini span b { color:var(--verde); }
+  .etiqueta { display:inline-block; font-size:11px; border:1px solid var(--borde); border-radius:6px; padding:1px 6px; color:var(--suave); }
+  a { color:var(--verde); }
+</style>
+</head>
+<body>
+<div class="contenedor">
+  <header>
+    <div class="logos">
+      <img src="img/logo_ema.png" alt="EMA Data Analytics">
+      <img class="mm" src="img/logo_macro.png" alt="MacroManager Consultora">
+      <h1>Resultados de la encuesta</h1>
+    </div>
+    <div class="barra-acciones oculto" id="acciones">
+      <select id="encuesta" aria-label="Encuesta">
+        <option value="interesados-2026">Interesados (vigente)</option>
+        <option value="analisis-datos-2026">Análisis de datos (cerrada)</option>
+      </select>
+      <span class="chico" id="usuario"></span>
+      <button class="btn btn-sec" id="actualizar">Actualizar</button>
+      <button class="btn btn-sec" id="csv_contactos">Contactos CSV</button>
+      <button class="btn btn-sec" id="csv_respuestas">Respuestas CSV</button>
+      <button class="btn btn-sec" id="salir">Salir</button>
+    </div>
+  </header>
+
+  <div class="login" id="login">
+    <b>Entrar</b>
+    <p class="chico">Solo el usuario con rol super ve los resultados y los contactos.</p>
+    <label for="email">Email</label><input type="email" id="email" autocomplete="username">
+    <label for="clave">Contraseña</label><input type="password" id="clave" autocomplete="current-password">
+    <div style="margin-top:16px"><button class="btn btn-principal" id="entrar" style="width:100%">Entrar</button></div>
+    <div class="error" id="error_login"></div>
+  </div>
+
+  <div id="panel" class="oculto">
+    <div class="error" id="error"></div>
+    <h2>Embudo</h2>
+    <div class="tarjetas" id="embudo"></div>
+    <h2>¿Qué red trae interesados?</h2>
+    <div class="tabla"><table id="redes"></table></div>
+    <div class="mini" id="dispositivos" style="margin-top:10px"></div>
+    <h2>Contactos</h2>
+    <div class="tabla"><table id="contactos"></table></div>
+    <h2>Respuestas por pregunta</h2>
+    <div class="grilla" id="preguntas"></div>
+    <h2>Por día</h2>
+    <div class="tabla"><table id="dias"></table></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+var SUPABASE_URL = 'https://xgwkaqrgbdzzjmuouexr.supabase.co';
+var SUPABASE_CLAVE = 'sb_publishable_5SvsfeUJnRCxDPPsIcqL-w_q8STrMB0';
+var ESTADOS = [['nuevo', 'Nuevo'], ['contactado', 'Contactado'], ['en_conversacion', 'En conversación'], ['demo_agendada', 'Demo agendada'], ['cerrado', 'Cerrado'], ['descartado', 'Descartado']];
+var ASIGNADOS = [['', '—'], ['Anibal', 'Anibal'], ['Diego', 'Diego']];
+var REDES = { ig: 'Instagram', fb: 'Facebook', wa: 'WhatsApp', tiktok: 'TikTok', flyer: 'Flyer (QR)', directo: 'Directo', instagram: 'Instagram' };
+var ETIQUETAS = { rol: 'Rol', rubro: 'Rubro', tamano: 'Personas', sistema: 'Sistema', sistema_cual: 'Cuál', origenes_datos: 'Datos en',
+  intereses: 'Quiere ver', dolor: 'Le cuesta', plazo: 'Plazo', consulta: 'Consulta', demo: 'Demo', utilidad: 'Utilidad' };
+var cliente = null;
+var datos = null;
+
+function el(id) { return document.getElementById(id); }
+function esc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function fecha(t) { if (!t) { return ''; } var d = new Date(t); return d.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+function pct(a, b) { return b > 0 ? Math.round(100 * a / b) + ' %' : '—'; }
+function red(o) { return REDES[o] || o; }
+function valorTexto(v) { if (v == null) { return ''; } return Object.prototype.toString.call(v) === '[object Array]' ? v.join(', ') : String(v); }
+function textoError(e) {
+  var m = (e && (e.message || e.msg)) || String(e || '');
+  if (/Invalid login/i.test(m)) { return 'Email o contraseña incorrectos.'; }
+  if (/Failed to fetch|NetworkError/i.test(m)) { return 'No hay conexión.'; }
+  return m;
+}
+function encuesta() { return el('encuesta').value; }
+
+function entrar() {
+  var b = el('entrar'); b.disabled = true; el('error_login').textContent = '';
+  cliente.auth.signInWithPassword({ email: el('email').value.trim(), password: el('clave').value }).then(function (r) {
+    b.disabled = false; el('clave').value = '';
+    if (r.error) { el('error_login').textContent = textoError(r.error); return; }
+    cargar();
+  });
+}
+
+function cargar() {
+  el('error').textContent = '';
+  cliente.rpc('api_encuesta_resultados', { p_encuesta: encuesta() }).then(function (r) {
+    if (r.error) {
+      if (/Acceso denegado|sin perfil/i.test(r.error.message || '')) {
+        cliente.auth.signOut();
+        el('panel').classList.add('oculto'); el('acciones').classList.add('oculto'); el('login').classList.remove('oculto');
+        el('error_login').textContent = r.error.message;
+        return;
+      }
+      el('error').textContent = textoError(r.error); return;
+    }
+    datos = r.data;
+    el('login').classList.add('oculto'); el('panel').classList.remove('oculto'); el('acciones').classList.remove('oculto');
+    cliente.auth.getUser().then(function (u) { el('usuario').textContent = u.data && u.data.user ? u.data.user.email : ''; });
+    dibujar();
+  });
+}
+
+function dibujar() {
+  var e = datos.embudo;
+  var interesados = encuesta() === 'interesados-2026';
+  var t = [['Entraron', e.entraron, ''], ['Empezaron a completar', e.empezaron, pct(e.empezaron, e.entraron)]];
+  if (!interesados) { t.push(['Vieron tableros', e.vieron_tableros, pct(e.vieron_tableros, e.entraron)]); }
+  t.push([interesados ? 'Enviaron' : 'Terminaron', e.terminaron, pct(e.terminaron, e.entraron)]);
+  if (!interesados) { t.push(['Anónimos', e.anonimos, pct(e.anonimos, e.terminaron)]); }
+  t.push(['Dejaron contacto', e.dejaron_datos, pct(e.dejaron_datos, e.entraron)]);
+  t.push(['WhatsApp Anibal', e.whatsapp_anibal, '']); t.push(['WhatsApp Diego', e.whatsapp_diego, '']);
+  el('embudo').innerHTML = t.map(function (x) {
+    return '<div class="tarjeta"><div class="n mono">' + x[1] + '</div><div class="t">' + x[0] + '</div><div class="p mono">' + x[2] + '</div></div>';
+  }).join('');
+
+  var visitas = datos.por_origen || {}, contactos = datos.contactos_por_origen || {};
+  var claves = Object.keys(visitas);
+  Object.keys(contactos).forEach(function (k) { if (claves.indexOf(k) < 0) { claves.push(k); } });
+  claves.sort(function (a, b) { return (contactos[b] || 0) - (contactos[a] || 0) || (visitas[b] || 0) - (visitas[a] || 0); });
+  el('redes').innerHTML = '<tr><th>Red</th><th>Visitas</th><th>Contactos</th><th>Conversión</th></tr>' +
+    (claves.length ? claves.map(function (k) {
+      return '<tr><td>' + esc(red(k)) + ' <span class="chico mono">' + esc(k) + '</span></td><td class="mono">' + (visitas[k] || 0) + '</td><td class="mono">' + (contactos[k] || 0) + '</td><td class="mono">' + pct(contactos[k] || 0, visitas[k] || 0) + '</td></tr>';
+    }).join('') : '<tr><td colspan="4" class="chico">Todavía no hay visitas.</td></tr>');
+  var disp = datos.por_dispositivo || {};
+  el('dispositivos').innerHTML = '<span>Dispositivo: ' + (Object.keys(disp).length ? Object.keys(disp).map(function (k) { return esc(k) + ' <b class="mono">' + disp[k] + '</b>'; }).join(' · ') : '—') + '</span>';
+
+  var c = datos.contactos || [];
+  var h = '<tr><th>Fecha</th><th>Red</th><th>Nombre / empresa</th><th>Contacto</th><th>Prefiere</th><th>Respuestas</th><th>Estado</th><th>Asignado</th><th>Nota</th><th>Contactado</th><th></th></tr>';
+  if (!c.length) { h += '<tr><td colspan="11" class="chico">Todavía no hay contactos.</td></tr>'; }
+  c.forEach(function (x) {
+    var est = ESTADOS.map(function (s) { return '<option value="' + s[0] + '"' + (x.estado === s[0] ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('');
+    var asg = ASIGNADOS.map(function (s) { return '<option value="' + s[0] + '"' + ((x.asignado_a || '') === s[0] ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('');
+    var tel = x.whatsapp ? '<a target="_blank" rel="noopener" href="https://wa.me/' + esc(String(x.whatsapp).replace(/[^0-9]/g, '')) + '">' + esc(x.whatsapp) + '</a><br>' : '';
+    var mail = x.email ? '<a href="mailto:' + esc(x.email) + '">' + esc(x.email) + '</a>' : '';
+    var r = x.respuestas || {};
+    var resp = Object.keys(ETIQUETAS).filter(function (k) { return r[k] != null && valorTexto(r[k]) !== ''; })
+      .map(function (k) { return '<b>' + ETIQUETAS[k] + ':</b> ' + esc(valorTexto(r[k])); }).join('<br>');
+    h += '<tr data-id="' + x.id + '"><td class="mono">' + fecha(x.creado) + '</td><td><span class="etiqueta">' + esc(red(x.origen)) + '</span></td>' +
+         '<td>' + esc(x.nombre) + (x.empresa ? '<br><span class="chico">' + esc(x.empresa) + '</span>' : '') + '</td>' +
+         '<td>' + tel + mail + '</td><td>' + esc(x.contacto_pref) + '</td><td><div class="resp">' + (resp || '<span class="chico">—</span>') + '</div></td>' +
+         '<td><select class="estado">' + est + '</select></td><td><select class="asignado">' + asg + '</select></td>' +
+         '<td><textarea class="nota" maxlength="1000">' + esc(x.nota) + '</textarea></td><td class="mono">' + fecha(x.contactado_en) + '</td>' +
+         '<td><button class="btn btn-sec guardar">Guardar</button><div class="chico ok"></div></td></tr>';
+  });
+  el('contactos').innerHTML = h;
+  Array.prototype.forEach.call(el('contactos').querySelectorAll('button.guardar'), function (b) {
+    b.onclick = function () {
+      var tr = b.closest('tr'); var ok = tr.querySelector('.ok');
+      b.disabled = true; ok.textContent = '';
+      cliente.rpc('api_encuesta_contacto_estado', { p_id: Number(tr.getAttribute('data-id')), p_estado: tr.querySelector('.estado').value,
+          p_nota: tr.querySelector('.nota').value, p_asignado: tr.querySelector('.asignado').value })
+        .then(function (r) {
+          b.disabled = false; ok.textContent = r.error ? textoError(r.error) : 'Guardado'; ok.style.color = r.error ? 'var(--rojo)' : 'var(--verde)';
+          if (!r.error) { setTimeout(cargar, 600); }
+        });
+    };
+  });
+
+  el('preguntas').innerHTML = (datos.por_pregunta || []).map(function (p) {
+    var s = '<div class="preg"><h3>' + esc(p.texto) + '</h3><div class="sub mono">' + p.respondieron + ' respuestas' + (p.promedio != null ? ' · promedio ' + p.promedio : '') + '</div>';
+    if (p.conteo) {
+      var max = 0; Object.keys(p.conteo).forEach(function (k) { if (p.conteo[k] > max) { max = p.conteo[k]; } });
+      var ks = Object.keys(p.conteo);
+      if (p.tipo !== 'escala') { ks.sort(function (a, b) { return p.conteo[b] - p.conteo[a]; }); }
+      s += ks.map(function (k) {
+        var n = p.conteo[k];
+        return '<div class="fila"><div>' + esc(k) + '<div class="barra"><div style="width:' + (max ? Math.round(100 * n / max) : 0) + '%"></div></div></div><div class="num mono">' + n + '</div></div>';
+      }).join('');
+    }
+    if (p.textos) {
+      s += p.textos.length ? p.textos.map(function (x) { return '<div class="texto-libre"><small class="mono">' + fecha(x.cuando) + '</small>' + esc(x.texto) + '</div>'; }).join('') : '<div class="chico">Sin respuestas todavía.</div>';
+    }
+    return s + '</div>';
+  }).join('');
+
+  var d = datos.por_dia || [];
+  el('dias').innerHTML = '<tr><th>Día</th><th>Entraron</th><th>' + (interesados ? 'Enviaron' : 'Terminaron') + '</th></tr>' +
+    (d.length ? d.map(function (x) { return '<tr><td class="mono">' + esc(x.dia) + '</td><td class="mono">' + x.entraron + '</td><td class="mono">' + x.terminaron + '</td></tr>'; }).join('') : '<tr><td colspan="3" class="chico">Sin datos todavía.</td></tr>');
+}
+
+function bajarCSV(nombre, filas) {
+  var txt = filas.map(function (f) {
+    return f.map(function (v) { var s = String(v == null ? '' : v); if (/^[=+\-@]/.test(s)) { s = "'" + s; } return /[";\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }).join(';');
+  }).join('\r\n');
+  var blob = new Blob(['﻿' + txt], { type: 'text/csv;charset=utf-8' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nombre;
+  document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+
+function csvContactos() {
+  var cols = Object.keys(ETIQUETAS);
+  var f = [['Fecha', 'Red', 'Nombre', 'Empresa', 'Teléfono', 'Email', 'Prefiere', 'Estado', 'Asignado', 'Nota', 'Contactado'].concat(cols.map(function (k) { return ETIQUETAS[k]; }))];
+  (datos.contactos || []).forEach(function (x) {
+    var r = x.respuestas || {};
+    f.push([fecha(x.creado), red(x.origen), x.nombre, x.empresa, x.whatsapp, x.email, x.contacto_pref, x.estado, x.asignado_a, x.nota, fecha(x.contactado_en)]
+      .concat(cols.map(function (k) { return valorTexto(r[k]); })));
+  });
+  bajarCSV('encuesta_' + encuesta() + '_contactos.csv', f);
+}
+function csvRespuestas() {
+  var f = [['Pregunta', 'Opción', 'Cantidad', 'Respondieron', 'Promedio']];
+  (datos.por_pregunta || []).forEach(function (p) {
+    if (p.conteo) { Object.keys(p.conteo).forEach(function (k) { f.push([p.texto, k, p.conteo[k], p.respondieron, p.promedio]); }); }
+    if (p.textos) { p.textos.forEach(function (x) { f.push([p.texto, x.texto, '', p.respondieron, '']); }); }
+  });
+  bajarCSV('encuesta_' + encuesta() + '_respuestas.csv', f);
+}
+
+function arrancar() {
+  if (!window.supabase) { el('error_login').textContent = 'No se pudo cargar la página. Revisá la conexión.'; return; }
+  cliente = window.supabase.createClient(SUPABASE_URL, SUPABASE_CLAVE);
+  el('entrar').onclick = entrar;
+  el('clave').onkeydown = function (ev) { if (ev.key === 'Enter') { entrar(); } };
+  el('actualizar').onclick = cargar;
+  el('encuesta').onchange = cargar;
+  el('csv_contactos').onclick = csvContactos;
+  el('csv_respuestas').onclick = csvRespuestas;
+  el('salir').onclick = function () { cliente.auth.signOut().then(function () { location.reload(); }); };
+  cliente.auth.getSession().then(function (r) { if (r.data && r.data.session) { cargar(); } });
+}
+arrancar();
+</script>
+</body>
+</html>
