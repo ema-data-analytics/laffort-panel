@@ -70,6 +70,7 @@
         <option value="interesados-2026">Interesados (vigente)</option>
         <option value="analisis-datos-2026">Análisis de datos (cerrada)</option>
       </select>
+      <a class="btn btn-sec" href="../" style="text-decoration:none;color:var(--texto)">← Panel</a>
       <span class="chico" id="usuario"></span>
       <button class="btn btn-sec" id="actualizar">Actualizar</button>
       <button class="btn btn-sec" id="csv_contactos">Contactos CSV</button>
@@ -265,14 +266,17 @@ function csvRespuestas() {
 
 function arrancar() {
   if (!window.supabase) { el('error_login').textContent = 'No se pudo cargar la página. Revisá la conexión.'; return; }
-  cliente = window.supabase.createClient(SUPABASE_URL, SUPABASE_CLAVE);
+  // misma forma de guardar la sesion que el panel (por pestana): si se entra desde el menu del panel, ya esta adentro
+  var almacen = null;
+  try { window.sessionStorage.setItem('__p', '1'); window.sessionStorage.removeItem('__p'); almacen = window.sessionStorage; } catch (e) { almacen = null; }
+  cliente = window.supabase.createClient(SUPABASE_URL, SUPABASE_CLAVE, almacen ? { auth: { storage: almacen, persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } } : {});
   el('entrar').onclick = entrar;
   el('clave').onkeydown = function (ev) { if (ev.key === 'Enter') { entrar(); } };
   el('actualizar').onclick = cargar;
   el('encuesta').onchange = cargar;
   el('csv_contactos').onclick = csvContactos;
   el('csv_respuestas').onclick = csvRespuestas;
-  el('salir').onclick = function () { cliente.auth.signOut().then(function () { location.reload(); }); };
+  el('salir').onclick = function () { cliente.auth.signOut().then(function () { location.href = '../'; }); };
   cliente.auth.getSession().then(function (r) { if (r.data && r.data.session) { cargar(); } });
 }
 arrancar();
